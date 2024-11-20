@@ -63,7 +63,7 @@ public class SolucioBacktracking {
 	 * cal guardar una COPIA de la millor solució a una variable
 	 */
 	private void backMillorSolucio(int indexUbicacio) {
-
+		
 	}
 	
 	private boolean acceptable(int indexUbicacio, int indexItem) {
