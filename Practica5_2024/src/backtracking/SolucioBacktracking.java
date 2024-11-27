@@ -63,11 +63,28 @@ public class SolucioBacktracking {
 	 * cal guardar una COPIA de la millor solució a una variable
 	 */
 	private void backMillorSolucio(int indexUbicacio) {
-		
+
 	}
 	
 	private boolean acceptable(int indexUbicacio, int indexItem) {
-		return false; //TODO
+		PosicioInicial pos= this.repte.getEspaisDisponibles().get(indexUbicacio);
+		char[] item = this.repte.getItem(indexItem);
+		int fil = pos.getInitRow();
+		int col = pos.getInitCol();
+		int length = pos.getLength();
+		char direccio = pos.getDireccio();
+		for(int i = 0; i < item.length; i++) {
+			if(direccio == 'H') {
+				if(col+i >= this.repte.getPuzzle()[0].length || this.repte.getPuzzle()[fil][col+i] != ' ' && this.repte.getPuzzle()[fil][col+i] != item[i])
+					return false;
+			}else {
+				if(fil+i >= this.repte.getPuzzle().length || this.repte.getPuzzle()[fil+i][col] != ' ' && this.repte.getPuzzle()[fil+i][col] != item[i])
+					return false;
+			}
+
+		}
+
+		return true; 
 	}
 	
 	private void anotarASolucio(int indexUbicacio, int indexItem) {
