@@ -108,7 +108,7 @@ public class SolucioBacktracking {
 		char[] item = this.repte.getItem(indexItem);
 		int fil = pos.getInitRow(); //creem les variables perque el codi sigui mes facil de llegir.
 		int col = pos.getInitCol();
-		for(int i = 0; i < item.length; i++) {
+		for(int i = 0; i < item.length+1; i++) {
 			//horitzontal
 			if(pos.getDireccio()== 'H') {
 				if (potElimiar(fil, col+i, item[i])) {
@@ -123,7 +123,7 @@ public class SolucioBacktracking {
 	}
 
 	private boolean potElimiar(int fil, int col, char car) {
-		return this.repte.getPuzzle()[fil][col]!=car; //TODO
+		return this.repte.getPuzzle()[fil][col]==car; //TODO
 	}
 	
 	private boolean esSolucio(int index) {
