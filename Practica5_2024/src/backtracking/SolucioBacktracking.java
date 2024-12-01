@@ -4,12 +4,17 @@ import estructura.PosicioInicial;
 
 public class SolucioBacktracking {
 
+		private boolean [] marcatge;
+		private char [][] millorSol;
+		private int millorPunt;
+		private  char[][] solucioActual;
+
 	/* TODO
 	 * cal definir els atributs necessaris
 	 */
 	private final Encreuades repte;
 
-	
+
 	public SolucioBacktracking(Encreuades repte) {
 		this.repte = repte;
 	}
@@ -19,6 +24,10 @@ public class SolucioBacktracking {
 	}
 
 	public Runnable start(boolean optim){
+		marcatge= new boolean[repte.getItemsSize()];
+		millorSol = null;
+		millorPunt = -1;
+		solucioActual = this.repte.getPuzzle();
 		/* TODO
 		 * cal inicialitzar els atributs necessaris
 		 */
@@ -64,7 +73,7 @@ public class SolucioBacktracking {
 	private void backMillorSolucio(int indexUbicacio) {
 
 	}
-	
+
 	private boolean acceptable(int indexUbicacio, int indexItem) {
 		PosicioInicial pos= this.repte.getEspaisDisponibles().get(indexUbicacio);
 		char[] item = this.repte.getItem(indexItem);
@@ -83,9 +92,9 @@ public class SolucioBacktracking {
 
 		}
 
-		return true; 
+		return true;
 	}
-	
+
 	private void anotarASolucio(int indexUbicacio, int indexItem) {
 		PosicioInicial pos= this.repte.getEspaisDisponibles().get(indexUbicacio);
 		//Obtenim la paraula
@@ -101,22 +110,24 @@ public class SolucioBacktracking {
 			}
 		}
 	}
-	
+
 	private void desanotarDeSolucio(int indexUbicacio, int indexItem) {
-		PosicioInicial pos= this.repte.getEspaisDisponibles().get(indexUbicacio);
-		//Obtenim la paraula
+		PosicioInicial pos = this.repte.getEspaisDisponibles().get(indexUbicacio);
+		// Obtenim la paraula
 		char[] item = this.repte.getItem(indexItem);
-		int fil = pos.getInitRow(); //creem les variables perque el codi sigui mes facil de llegir.
+		int fil = pos.getInitRow(); // Variables para simplificar la lectura
 		int col = pos.getInitCol();
-		for(int i = 0; i < item.length+1; i++) {
-			//horitzontal
-			if(pos.getDireccio()== 'H') {
-				if (potElimiar(fil, col+i, item[i])) {
-					this.repte.getPuzzle()[fil][col+i] = ' ';
+
+		for (int i = 0; i < item.length; i++) {
+			// Si es horitzontal
+			if (pos.getDireccio() == 'H') {
+				//verifiquem si la palabra està creuada
+				if (this.repte.getPuzzle()[fil][col + i] == item[i]) {
+					this.repte.getPuzzle()[fil][col + i] = ' ';
 				}
-			}else{
-				if (potElimiar(fil+i, col, item[i])) {
-					this.repte.getPuzzle()[fil+i][col] = ' ';
+			} else { // Si es vertical
+				if (this.repte.getPuzzle()[fil + i][col] == item[i]) {
+					this.repte.getPuzzle()[fil + i][col] = ' ';
 				}
 			}
 		}
@@ -125,25 +136,19 @@ public class SolucioBacktracking {
 	private boolean potElimiar(int fil, int col, char car) {
 		return this.repte.getPuzzle()[fil][col]==car; //TODO
 	}
-	
+
 	private boolean esSolucio(int index) {
-		for (char[] row : this.repte.getPuzzle()) {
-			for (char c : row) {
-				if (c == ' ')
-					return false;
-			}
-		}
-		return true;
+		return this.repte.getEspaisDisponibles().size()==index+1;
 	}
-	
+
 	private int calcularFuncioObjectiu(char[][] matriu) {
 		return 0; //TODO
 	}
-	
+
 	private void guardarMillorSolucio() {
 		// TODO - cal guardar un clone
 	}
-	
+
 	public String toString() {
 		String resultat = "";
 		//TODO
