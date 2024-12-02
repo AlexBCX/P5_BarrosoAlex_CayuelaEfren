@@ -20,7 +20,7 @@ public class SolucioBacktracking {
 	}
 
 	public char[][] getMillorSolucio() {
-		return null; //TODO
+		return this.millorSol; //TODO
 	}
 
 	public Runnable start(boolean optim){
@@ -71,66 +71,82 @@ public class SolucioBacktracking {
 	 * cal guardar una COPIA de la millor solució a una variable
 	 */
 	private void backMillorSolucio(int indexUbicacio) {
+		if (indexUbicacio >= this.repte.getEspaisDisponibles().size()) {
+			int puntuacioActual = calcularFuncioObjectiu(solucioActual);
+			if (puntuacioActual > millorPunt) {
+				millorPunt = puntuacioActual;
+				guardarMillorSolucio();
+			}
+			return;
+		}
 
+		for (int indexItem = 0; indexItem < this.repte.getItemsSize(); indexItem++) {
+			if (acceptable(indexUbicacio, indexItem)) {
+				anotarASolucio(indexUbicacio, indexItem);
+				backMillorSolucio(indexUbicacio + 1);
+				desanotarDeSolucio(indexUbicacio, indexItem);
+			}
+		}
 	}
 
 	private boolean acceptable(int indexUbicacio, int indexItem) {
-		PosicioInicial pos= this.repte.getEspaisDisponibles().get(indexUbicacio);
+		if (marcatge[indexItem]) {
+			return false; // Si ya se usó, no es aceptable
+		}
+		PosicioInicial pos = this.repte.getEspaisDisponibles().get(indexUbicacio);
 		char[] item = this.repte.getItem(indexItem);
 		int fil = pos.getInitRow();
 		int col = pos.getInitCol();
-		int length = pos.getLength();
-		char direccio = pos.getDireccio();
-		for(int i = 0; i < item.length; i++) {
-			if(direccio == 'H') {
-				if(col+i >= this.repte.getPuzzle()[0].length || this.repte.getPuzzle()[fil][col+i] != ' ' && this.repte.getPuzzle()[fil][col+i] != item[i])
+		for (int i = 0; i < item.length; i++) {
+			if (pos.getDireccio() == 'H') {
+				if (col + i >= this.repte.getPuzzle()[0].length ||
+						(this.repte.getPuzzle()[fil][col + i] != ' ' &&
+								this.repte.getPuzzle()[fil][col + i] != item[i])) {
 					return false;
-			}else {
-				if(fil+i >= this.repte.getPuzzle().length || this.repte.getPuzzle()[fil+i][col] != ' ' && this.repte.getPuzzle()[fil+i][col] != item[i])
+				}
+			} else {
+				if (fil + i >= this.repte.getPuzzle().length ||
+						(this.repte.getPuzzle()[fil + i][col] != ' ' &&
+								this.repte.getPuzzle()[fil + i][col] != item[i])) {
 					return false;
+				}
 			}
-
 		}
-
 		return true;
 	}
 
 	private void anotarASolucio(int indexUbicacio, int indexItem) {
-		PosicioInicial pos= this.repte.getEspaisDisponibles().get(indexUbicacio);
-		//Obtenim la paraula
+		PosicioInicial pos = this.repte.getEspaisDisponibles().get(indexUbicacio);
 		char[] item = this.repte.getItem(indexItem);
-		int fil = pos.getInitRow(); //creem les variables perque el codi sigui mes facil de llegir.
+		int fil = pos.getInitRow();
 		int col = pos.getInitCol();
-		for(int i = 0; i < item.length; i++) {
-			//horitzontal
-			if(pos.getDireccio() == 'H') {
-				this.repte.getPuzzle()[fil][col+i] = item[i];
-			}else {
-				this.repte.getPuzzle()[fil+i][col] = item[i];
+		for (int i = 0; i < item.length; i++) {
+			if (pos.getDireccio() == 'H') {
+				this.repte.getPuzzle()[fil][col + i] = item[i];
+			} else {
+				this.repte.getPuzzle()[fil + i][col] = item[i];
 			}
 		}
+		marcatge[indexItem] = true; // Marca el element UTILITZAT
 	}
 
 	private void desanotarDeSolucio(int indexUbicacio, int indexItem) {
 		PosicioInicial pos = this.repte.getEspaisDisponibles().get(indexUbicacio);
-		// Obtenim la paraula
 		char[] item = this.repte.getItem(indexItem);
-		int fil = pos.getInitRow(); // Variables para simplificar la lectura
+		int fil = pos.getInitRow();
 		int col = pos.getInitCol();
-
 		for (int i = 0; i < item.length; i++) {
-			// Si es horitzontal
 			if (pos.getDireccio() == 'H') {
-				//verifiquem si la palabra està creuada
 				if (this.repte.getPuzzle()[fil][col + i] == item[i]) {
 					this.repte.getPuzzle()[fil][col + i] = ' ';
 				}
-			} else { // Si es vertical
+			} else {
 				if (this.repte.getPuzzle()[fil + i][col] == item[i]) {
 					this.repte.getPuzzle()[fil + i][col] = ' ';
 				}
 			}
 		}
+		marcatge[indexItem] = false; // Desmarca el elemento
 	}
 
 	private boolean potElimiar(int fil, int col, char car) {
@@ -138,21 +154,44 @@ public class SolucioBacktracking {
 	}
 
 	private boolean esSolucio(int index) {
-		return this.repte.getEspaisDisponibles().size()==index+1;
+		for (boolean usado : marcatge) {
+			if (!usado) {
+				return false;
+			}
+		}
+		return index+1 == this.repte.getEspaisDisponibles().size();
 	}
 
 	private int calcularFuncioObjectiu(char[][] matriu) {
-		return 0; //TODO
+		int puntuacio = 0;
+		for (int i = 0; i < matriu.length; i++) {
+			for (int j = 0; j < matriu[i].length; j++) {
+				char c = matriu[i][j];
+				// Suma el valor ASCII del caràcter
+				if (c != ' ' && c != '▪') {
+					puntuacio += c; // ASCII del carácter
+				}
+			}
+		}
+		return puntuacio;
 	}
 
 	private void guardarMillorSolucio() {
-		// TODO - cal guardar un clone
+		millorSol = new char[solucioActual.length][];
+		for (int i = 0; i < solucioActual.length; i++) {
+			millorSol[i] = solucioActual[i].clone();
+		}
 	}
 
 	public String toString() {
-		String resultat = "";
-		//TODO
-		return resultat;
+		StringBuilder resultat = new StringBuilder();
+		for (char[] fila : solucioActual) {
+			for (char c : fila) {
+				resultat.append(c == ' ' ? '.' : c).append(' ');
+			}
+			resultat.append('\n');
+		}
+		return resultat.toString();
 	}
 
 }
