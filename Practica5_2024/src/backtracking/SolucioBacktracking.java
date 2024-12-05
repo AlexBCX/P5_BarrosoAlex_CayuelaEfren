@@ -27,7 +27,11 @@ public class SolucioBacktracking {
 		marcatge= new boolean[repte.getItemsSize()];
 		millorSol = null;
 		millorPunt = -1;
-		solucioActual = this.repte.getPuzzle();
+		solucioActual = new char[repte.getPuzzle().length][];
+		for (int i = 0; i < repte.getPuzzle().length; i++) {
+			solucioActual[i] = repte.getPuzzle()[i].clone();
+		}
+
 		/* TODO
 		 * cal inicialitzar els atributs necessaris
 		 */
@@ -71,7 +75,7 @@ public class SolucioBacktracking {
 	 * cal guardar una COPIA de la millor solució a una variable
 	 */
 	private void backMillorSolucio(int indexUbicacio) {
-		if (indexUbicacio >= this.repte.getEspaisDisponibles().size()) {
+		if (indexUbicacio >= repte.getEspaisDisponibles().size()) {
 			int puntuacioActual = calcularFuncioObjectiu(solucioActual);
 			if (puntuacioActual > millorPunt) {
 				millorPunt = puntuacioActual;
@@ -80,7 +84,7 @@ public class SolucioBacktracking {
 			return;
 		}
 
-		for (int indexItem = 0; indexItem < this.repte.getItemsSize(); indexItem++) {
+		for (int indexItem = 0; indexItem < repte.getItemsSize(); indexItem++) {
 			if (acceptable(indexUbicacio, indexItem)) {
 				anotarASolucio(indexUbicacio, indexItem);
 				backMillorSolucio(indexUbicacio + 1);
@@ -91,23 +95,22 @@ public class SolucioBacktracking {
 
 	private boolean acceptable(int indexUbicacio, int indexItem) {
 		if (marcatge[indexItem]) {
-			return false; // Si ya se usó, no es aceptable
+			return false; // no es acceptable si ja l'hem usat
 		}
-		PosicioInicial pos = this.repte.getEspaisDisponibles().get(indexUbicacio);
-		char[] item = this.repte.getItem(indexItem);
+		PosicioInicial pos = repte.getEspaisDisponibles().get(indexUbicacio);
+		char[] item = repte.getItem(indexItem);
 		int fil = pos.getInitRow();
 		int col = pos.getInitCol();
+
 		for (int i = 0; i < item.length; i++) {
 			if (pos.getDireccio() == 'H') {
-				if (col + i >= this.repte.getPuzzle()[0].length ||
-						(this.repte.getPuzzle()[fil][col + i] != ' ' &&
-								this.repte.getPuzzle()[fil][col + i] != item[i])) {
+				if (col + i >= solucioActual[0].length ||
+						(solucioActual[fil][col + i] != ' ' && solucioActual[fil][col + i] != item[i])) {
 					return false;
 				}
-			} else {
-				if (fil + i >= this.repte.getPuzzle().length ||
-						(this.repte.getPuzzle()[fil + i][col] != ' ' &&
-								this.repte.getPuzzle()[fil + i][col] != item[i])) {
+			} else { // Dirección vertical
+				if (fil + i >= solucioActual.length ||
+						(solucioActual[fil + i][col] != ' ' && solucioActual[fil + i][col] != item[i])) {
 					return false;
 				}
 			}
@@ -116,37 +119,39 @@ public class SolucioBacktracking {
 	}
 
 	private void anotarASolucio(int indexUbicacio, int indexItem) {
-		PosicioInicial pos = this.repte.getEspaisDisponibles().get(indexUbicacio);
-		char[] item = this.repte.getItem(indexItem);
+		PosicioInicial pos = repte.getEspaisDisponibles().get(indexUbicacio);
+		char[] item = repte.getItem(indexItem);
 		int fil = pos.getInitRow();
 		int col = pos.getInitCol();
+
 		for (int i = 0; i < item.length; i++) {
 			if (pos.getDireccio() == 'H') {
-				this.repte.getPuzzle()[fil][col + i] = item[i];
+				solucioActual[fil][col + i] = item[i];
 			} else {
-				this.repte.getPuzzle()[fil + i][col] = item[i];
+				solucioActual[fil + i][col] = item[i];
 			}
 		}
-		marcatge[indexItem] = true; // Marca el element UTILITZAT
+		marcatge[indexItem] = true; // ho marca usat
 	}
 
 	private void desanotarDeSolucio(int indexUbicacio, int indexItem) {
-		PosicioInicial pos = this.repte.getEspaisDisponibles().get(indexUbicacio);
-		char[] item = this.repte.getItem(indexItem);
+		PosicioInicial pos = repte.getEspaisDisponibles().get(indexUbicacio);
+		char[] item = repte.getItem(indexItem);
 		int fil = pos.getInitRow();
 		int col = pos.getInitCol();
+
 		for (int i = 0; i < item.length; i++) {
 			if (pos.getDireccio() == 'H') {
-				if (this.repte.getPuzzle()[fil][col + i] == item[i]) {
-					this.repte.getPuzzle()[fil][col + i] = ' ';
+				if (solucioActual[fil][col + i] == item[i]) {
+					solucioActual[fil][col + i] = ' ';
 				}
 			} else {
-				if (this.repte.getPuzzle()[fil + i][col] == item[i]) {
-					this.repte.getPuzzle()[fil + i][col] = ' ';
+				if (solucioActual[fil + i][col] == item[i]) {
+					solucioActual[fil + i][col] = ' ';
 				}
 			}
 		}
-		marcatge[indexItem] = false; // Desmarca el elemento
+		marcatge[indexItem] = false; // ho marca com a no usat
 	}
 
 	private boolean potElimiar(int fil, int col, char car) {
@@ -169,7 +174,7 @@ public class SolucioBacktracking {
 				char c = matriu[i][j];
 				// Suma el valor ASCII del caràcter
 				if (c != ' ' && c != '▪') {
-					puntuacio += c; // ASCII del carácter
+					puntuacio += (int) c; // ASCII del carácter
 				}
 			}
 		}
