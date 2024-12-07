@@ -69,41 +69,42 @@ public class SolucioBacktracking {
 		}
 		return trobada;
 	}
+
 	/* TODO
 	 * Esquema recursiu que busca totes les solucions
 	 * no cal utilitzar una variable booleana per aturar perquè busquem totes les solucions
 	 * cal guardar una COPIA de la millor solució a una variable
 	 */
 	private void backMillorSolucio(int indexUbicacio) {
-		if (indexUbicacio >= repte.getEspaisDisponibles().size()) {
-			int puntuacioActual = calcularFuncioObjectiu(solucioActual);
-			if (puntuacioActual > millorPunt) {
-				millorPunt = puntuacioActual;
-				guardarMillorSolucio();
-			}
-			return;
-		}
-
-		for (int indexItem = 0; indexItem < repte.getItemsSize(); indexItem++) {
-			if (acceptable(indexUbicacio, indexItem)) {
+		for(int indexItem = 0; indexItem < this.repte.getItemsSize(); indexItem++) {
+			//mirem si l'element es pot posar a la ubicació actual
+			if(acceptable( indexUbicacio, indexItem)) {
+				//posem l'element a la solució actual
 				anotarASolucio(indexUbicacio, indexItem);
-				backMillorSolucio(indexUbicacio + 1);
+
+				if(esSolucio(indexUbicacio) && calcularFuncioObjectiu(this.solucioActual) > this.millorPunt) { // és solució si totes les ubicacions estan plenes
+					millorPunt = calcularFuncioObjectiu(this.solucioActual);
+					guardarMillorSolucio();
+				} else this.backMillorSolucio(indexUbicacio+1); //inserim la següent paraula
+
+				// esborrem la paraula actual, per després posar-la a una altra ubicació
 				desanotarDeSolucio(indexUbicacio, indexItem);
 			}
 		}
 	}
 
 	private boolean acceptable(int indexUbicacio, int indexItem) {
-		if (marcatge[indexItem]) {
-			return false; // no es acceptable si ja l'hem usat
-		}
+
 		PosicioInicial pos = repte.getEspaisDisponibles().get(indexUbicacio);
 		char[] item = repte.getItem(indexItem);
 		int fil = pos.getInitRow();
 		int col = pos.getInitCol();
 
+		if (marcatge[indexItem] || pos.getLength() != item.length) return false; // no es acceptable si ja l'hem usat o té un tamany diferent
+
 		for (int i = 0; i < item.length; i++) {
 			if (pos.getDireccio() == 'H') {
+				//supera els limits horitzontals
 				if (col + i >= solucioActual[0].length ||
 						(solucioActual[fil][col + i] != ' ' && solucioActual[fil][col + i] != item[i])) {
 					return false;
@@ -140,13 +141,15 @@ public class SolucioBacktracking {
 		int fil = pos.getInitRow();
 		int col = pos.getInitCol();
 
-		for (int i = 0; i < item.length; i++) {
-			if (pos.getDireccio() == 'H') {
-				if (solucioActual[fil][col + i] == item[i]) {
+		if (pos.getDireccio() == 'H') {
+			for (int i = 0; i < pos.getLength(); i++) {
+				if (potElimiar(fil, col+i, pos.getDireccio())) {
 					solucioActual[fil][col + i] = ' ';
 				}
-			} else {
-				if (solucioActual[fil + i][col] == item[i]) {
+			}
+		} else {
+			for (int i = 0; i < pos.getLength(); i++) {
+				if (potElimiar(fil + i, col, pos.getDireccio())) {
 					solucioActual[fil + i][col] = ' ';
 				}
 			}
@@ -154,17 +157,18 @@ public class SolucioBacktracking {
 		marcatge[indexItem] = false; // ho marca com a no usat
 	}
 
-	private boolean potElimiar(int fil, int col, char car) {
-		return this.repte.getPuzzle()[fil][col]==car; //TODO
-	}
+	private boolean potElimiar(int fil, int col, char dir) {
+		if (dir == 'H') {
+            return (fil - 1 > 0 && (this.solucioActual[fil - 1][col] == '▪' || this.solucioActual[fil - 1][col] == ' ')) ||
+                    (fil + 1 < this.solucioActual.length && (this.solucioActual[fil + 1][col] == '▪' || this.solucioActual[fil + 1][col] == ' '));
+		} else {
+            return (col - 1 > 0 && (this.solucioActual[fil][col - 1] == '▪' || this.solucioActual[fil][col - 1] == ' ')) ||
+                    (col + 1 < this.solucioActual[0].length && (this.solucioActual[fil][col + 1] == '▪' || this.solucioActual[fil][col + 1] == ' '));
+		}
+    }
 
 	private boolean esSolucio(int index) {
-		for (boolean usado : marcatge) {
-			if (!usado) {
-				return false;
-			}
-		}
-		return index+1 == this.repte.getEspaisDisponibles().size();
+		return (index + 1 == this.repte.getEspaisDisponibles().size());
 	}
 
 	private int calcularFuncioObjectiu(char[][] matriu) {
