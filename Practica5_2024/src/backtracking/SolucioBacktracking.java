@@ -45,10 +45,6 @@ public class SolucioBacktracking {
 		return null;
 	}
 
-	/* esquema recursiu que troba una solució
-	 * utilitzem una variable booleana (que retornem)
-	 * per aturar el recorregut quan haguem trobat una solució
-	 */
 	private boolean backUnaSolucio(int indexUbicacio) {
 		boolean trobada = false;
 		// iterem sobre els possibles elements
@@ -70,11 +66,6 @@ public class SolucioBacktracking {
 		return trobada;
 	}
 
-	/* TODO
-	 * Esquema recursiu que busca totes les solucions
-	 * no cal utilitzar una variable booleana per aturar perquè busquem totes les solucions
-	 * cal guardar una COPIA de la millor solució a una variable
-	 */
 	private void backMillorSolucio(int indexUbicacio) {
 		for(int indexItem = 0; indexItem < this.repte.getItemsSize(); indexItem++) {
 			//mirem si l'element es pot posar a la ubicació actual
